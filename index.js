@@ -1,66 +1,92 @@
 
 
-function countEven(number){
-  if( number <= 12){
-    console.log(number)
-    countEven(number+2)
+class Account {
+
+  constructor(username) {
+    this.username = username;
+    this.transactions = [];
   }
+
+  get balance() {
+    let balance = 0;
+    for (let amm of this.transactions) {
+      balance += amm.value;
+    }
+    return balance;
+  }
+
+  addTransaction(transaction) {
+    this.transactions.push(transaction);
+  }
+
 }
 
-countEven(0)
+class Transaction {
+
+  constructor(amount, account) {
+    this.amount = amount;
+    this.account = account;
+  }
+
+  commit() {
+    if (!this.isAllowed()) return false;
+    this.time = new Date();
+    this.account.addTransaction(this);
+    return true;
+  }
+
+}
 
 
-// let balance = 500.00;
+class Deposit extends Transaction {
 
-// class Account {
+  get value() {
+    return this.amount;
+  }
 
-//   constructor(username) {
-//     this.username = username;
-//     this.balance = 0;
-//   }
+  isAllowed() {
+    return true;
+  }
 
-// }
+}
 
-// class Transaction {
 
-//   constructor(amount, account) {
-//     this.amount  = amount;
-//     this.account = account;
-//   }
+class Withdrawal extends Transaction {
 
-//   commit() {
-//     this.account.balance += this.value;
-//   }
+  get value() {
+    return -this.amount;
+  }
 
-// }
+  isAllowed() {
+    return (this.account.balance - this.amount >= 0);
+  }
 
-// class Deposit extends Transaction {
+}
 
-//   get value() {
-//     return this.amount
-//   }
 
-// }
 
-// class Withdrawal extends Transaction {
 
-//   get value() {
-//     return -this.amount;
-//   }
+//DRIVER CODE BELOW
 
-// }
+const myAccount = new Account();
 
-// // DRIVER CODE BELOW
+console.log('Starting Account Balance: ', myAccount.balance);
 
-// const myAccount = new Account('billybob');
+console.log('Attempting to withdraw even $1 should fail...');
+const t1 = new Withdrawal(1.00, myAccount);
+console.log('Commit result:', t1.commit());
+console.log('Account Balance: ', myAccount.balance);
 
-// console.log('Starting Balance:', myAccount.balance);
+console.log('Depositing should succeed...');
+const t2 = new Deposit(9.99, myAccount);
+console.log('Commit result:', t2.commit());
+console.log('Account Balance: ', myAccount.balance);
 
-// const t1 = new Deposit(120.00, myAccount);
-// t1.commit();
+console.log('Withdrawal for 9.99 should be allowed...');
+const t3 = new Withdrawal(9.99, myAccount);
+console.log('Commit result:', t3.commit());
 
-// const t2 = new Withdrawal(50.00, myAccount);
-// t2.commit();
+console.log('Ending Account Balance: ', myAccount.balance);
+console.log("Lookings like I'm broke again");
 
-// console.log('Ending Balance:', myAccount.balance);
-
+console.log('Account Transaction History: ', myAccount.transactions);
